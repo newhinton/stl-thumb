@@ -34,7 +34,7 @@ pub struct Config {
 
 impl Default for Config {
     fn default() -> Self {
-        Config {
+        let mut cfg = Config {
             model_filename: "".to_string(),
             img_filename: "".to_string(),
             format: ImageFormat::Png,
@@ -50,7 +50,12 @@ impl Default for Config {
             background: (0.0, 0.0, 0.0, 0.0),
             aamethod: AAMethod::FXAA,
             recalc_normals: false,
-        }
+        };
+
+        // at the moment unused, allow specification via cli.
+        let override_config_file = "".to_string();
+        return Self::read_default_values_from_ini(cfg, override_config_file);
+
     }
 }
 
@@ -131,11 +136,6 @@ impl Config {
         let mut c = Config {
             ..Default::default()
         };
-
-
-        // at the moment unused, allow specification via cli.
-        let override_config_file = "".to_string();
-        c = Self::read_default_values_from_ini(c, override_config_file);
 
         c.model_filename = matches
             .remove_one::<String>("MODEL_FILE")
