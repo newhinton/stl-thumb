@@ -132,8 +132,10 @@ impl Config {
             ..Default::default()
         };
 
-        let default_config_file = env::var("HOME").unwrap()+"/.config/stl-thumb/conf.ini";
-        c = Self::read_default_values_from_ini(c, default_config_file);
+
+        // at the moment unused, allow specification via cli.
+        let override_config_file = "".to_string();
+        c = Self::read_default_values_from_ini(c, override_config_file);
 
         c.model_filename = matches
             .remove_one::<String>("MODEL_FILE")
@@ -183,12 +185,30 @@ impl Config {
         c
     }
 
-    fn read_default_values_from_ini(mut hardcoded: Config, config_file_path: String) -> Config {
-        if !Path::new(&config_file_path).exists() {
+    fn read_default_values_from_ini(mut hardcoded: Config, config_file_path_override: String) -> Config {
+
+
+        let config_locations = [
+            "/etc/stl-thumb/conf.ini".to_string(),
+            env::var("HOME").unwrap()+"/.config/stl-thumb/conf.ini",
+            config_file_path_override,
+        ];
+
+        let mut config: String = String::new();
+        let mut found_config = false;
+        for location in config_locations {
+            if Path::new(&location).exists() {
+                config = location;
+                found_config = true;
+                break
+            }
+        }
+
+        if !found_config {
             return hardcoded
         }
 
-        let conf = Ini::load_from_file(config_file_path).unwrap();
+        let conf = Ini::load_from_file(config).unwrap();
         let colors = conf.section(Some("Colors")).unwrap();
 
         if let Some(diffuse) = colors.get("diffuse") {
