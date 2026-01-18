@@ -132,7 +132,7 @@ impl Config {
             ..Default::default()
         };
 
-        let default_config_file = env::var("HOME").unwrap()+".config/stl-thumb/conf.ini";
+        let default_config_file = env::var("HOME").unwrap()+"/.config/stl-thumb/conf.ini";
         c = Self::read_default_values_from_ini(c, default_config_file);
 
         c.model_filename = matches
@@ -184,6 +184,10 @@ impl Config {
     }
 
     fn read_default_values_from_ini(mut hardcoded: Config, config_file_path: String) -> Config {
+        if !Path::new(&config_file_path).exists() {
+            return hardcoded
+        }
+
         let conf = Ini::load_from_file(config_file_path).unwrap();
         let colors = conf.section(Some("Colors")).unwrap();
 
