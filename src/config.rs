@@ -1,6 +1,8 @@
 use image::ImageFormat;
 use std::f32;
 use std::path::Path;
+use ini::Ini;
+use std::env;
 
 #[derive(Clone)]
 pub struct Material {
@@ -130,6 +132,9 @@ impl Config {
             ..Default::default()
         };
 
+        let default_config_file = env::var("HOME").unwrap()+".config/stl-thumb/conf.ini";
+        c = Self::read_default_values_from_ini(c, default_config_file);
+
         c.model_filename = matches
             .remove_one::<String>("MODEL_FILE")
             .expect("MODEL_FILE not provided");
@@ -176,6 +181,52 @@ impl Config {
         c.recalc_normals = matches.contains_id("recalc_normals");
 
         c
+    }
+
+    fn read_default_values_from_ini(mut hardcoded: Config, config_file_path: String) -> Config {
+        let conf = Ini::load_from_file(config_file_path).unwrap();
+        let colors = conf.section(Some("Colors")).unwrap();
+
+        if let Some(diffuse) = colors.get("diffuse") {
+            hardcoded.material.diffuse = html_to_rgb(&*diffuse.replace("#", ""));
+            hardcoded.material.ambient[0] = hardcoded.material.diffuse[0]*0.1;
+            hardcoded.material.ambient[1] = hardcoded.material.diffuse[1]*0.1;
+            hardcoded.material.ambient[2] = hardcoded.material.diffuse[2]*0.1;
+        }
+
+        if let Some(red) = colors.get("diffuse_red") {
+            let red_value = red.parse::<f32>().unwrap();
+            hardcoded.material.diffuse[0] = red_value;
+            hardcoded.material.ambient[0] = red_value * 0.1;
+        }
+
+        if let Some(green) = colors.get("diffuse_green") {
+            let green_value = green.parse::<f32>().unwrap();
+            hardcoded.material.diffuse[1] = green_value;
+            hardcoded.material.ambient[1] = green_value * 0.1;
+        }
+
+        if let Some(blue) = colors.get("diffuse_blue") {
+            let blue_value = blue.parse::<f32>().unwrap();
+            hardcoded.material.diffuse[2] = blue_value;
+            hardcoded.material.ambient[2] = blue_value * 0.1;
+        }
+
+        if let Some(bg) = colors.get("background") {
+            hardcoded.background = html_to_rgba(&*bg.replace("#", ""));
+        }
+
+        let renderer = conf.section(Some("Renderer")).unwrap();
+
+        if let Some(aamethod) = renderer.get("aamethod") {
+            match aamethod {
+                "none" => hardcoded.aamethod = AAMethod::None,
+                "fxaa" => hardcoded.aamethod = AAMethod::FXAA,
+                _ => {}
+            }
+        }
+
+        hardcoded
     }
 }
 
