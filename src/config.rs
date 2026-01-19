@@ -34,7 +34,7 @@ pub struct Config {
 
 impl Default for Config {
     fn default() -> Self {
-        let mut cfg = Config {
+        let cfg = Config {
             model_filename: "".to_string(),
             img_filename: "".to_string(),
             format: ImageFormat::Png,
@@ -54,7 +54,7 @@ impl Default for Config {
 
         // at the moment unused, allow specification via cli.
         let override_config_file = "".to_string();
-        return Self::read_default_values_from_ini(cfg, override_config_file);
+        Self::read_default_values_from_ini(cfg, override_config_file)
 
     }
 }
@@ -187,28 +187,22 @@ impl Config {
 
     fn read_default_values_from_ini(mut hardcoded: Config, config_file_path_override: String) -> Config {
 
-
         let config_locations = [
-            "/etc/stl-thumb/conf.ini".to_string(),
-            env::var("HOME").unwrap()+"/.config/stl-thumb/conf.ini",
             config_file_path_override,
+            env::var("HOME").unwrap()+"/.config/stl-thumb/conf.ini2",
+            "/etc/stl-thumb/conf.ini2".to_string(),
         ];
 
-        let mut config: String = String::new();
-        let mut found_config = false;
-        for location in config_locations {
-            if Path::new(&location).exists() {
-                config = location;
-                found_config = true;
-                break
-            }
-        }
+        let config = config_locations
+            .into_iter()
+            .filter(|path| Path::new(path).exists())
+            .next();
 
-        if !found_config {
+        if config.is_none() {
             return hardcoded
         }
 
-        let conf = Ini::load_from_file(config).unwrap();
+        let conf = Ini::load_from_file(config.unwrap()).unwrap();
         let colors = conf.section(Some("Colors")).unwrap();
 
         if let Some(diffuse) = colors.get("diffuse") {
