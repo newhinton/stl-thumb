@@ -244,6 +244,39 @@ impl Config {
             }
         }
 
+        if let Some(width) = colors.get("width") {
+            hardcoded.width = width.parse().unwrap()
+        }
+
+        if let Some(height) = colors.get("height") {
+            hardcoded.height = height.parse().unwrap()
+        }
+
+        if let Some(format) = colors.get("format") {
+            match format {
+                "png" => hardcoded.format = ImageFormat::Png,
+                "jpeg" => hardcoded.format = ImageFormat::Jpeg,
+                "gif" => hardcoded.format = ImageFormat::Gif,
+                "webp" => hardcoded.format = ImageFormat::WebP,
+                "pnm" => hardcoded.format = ImageFormat::Pnm,
+                "tiff" => hardcoded.format = ImageFormat:: Tiff,
+                "tga" => hardcoded.format = ImageFormat::Tga,
+                "dds" => hardcoded.format = ImageFormat::Dds,
+                "bmp" => hardcoded.format = ImageFormat:: Bmp,
+                "ico" => hardcoded.format = ImageFormat::Ico,
+                "hdr" => hardcoded.format = ImageFormat::Hdr,
+                "openexr" => hardcoded.format = ImageFormat::OpenExr,
+                "farbfeld" => hardcoded.format = ImageFormat::Farbfeld,
+                "avif" => hardcoded.format = ImageFormat::Avif,
+                "qoi" => hardcoded.format = ImageFormat::Qoi,
+                _ => {}
+            }
+        }
+
+        if let Some(recalc_normals) = colors.get("recalc_normals") {
+            hardcoded.recalc_normals = recalc_normals.parse().unwrap()
+        }
+
         hardcoded
     }
 }
