@@ -189,8 +189,8 @@ impl Config {
 
         let config_locations = [
             config_file_path_override,
-            env::var("HOME").unwrap()+"/.config/stl-thumb/conf.ini2",
-            "/etc/stl-thumb/conf.ini2".to_string(),
+            env::var("HOME").unwrap()+"/.config/stl-thumb/conf.ini",
+            "/etc/stl-thumb/conf.ini".to_string(),
         ];
 
         let config = config_locations
@@ -205,26 +205,26 @@ impl Config {
         let conf = Ini::load_from_file(config.unwrap()).unwrap();
         let colors = conf.section(Some("Colors")).unwrap();
 
-        if let Some(diffuse) = colors.get("diffuse") {
+        if let Some(diffuse) = colors.get("color") {
             hardcoded.material.diffuse = html_to_rgb(&*diffuse.replace("#", ""));
             hardcoded.material.ambient[0] = hardcoded.material.diffuse[0]*0.1;
             hardcoded.material.ambient[1] = hardcoded.material.diffuse[1]*0.1;
             hardcoded.material.ambient[2] = hardcoded.material.diffuse[2]*0.1;
         }
 
-        if let Some(red) = colors.get("diffuse_red") {
+        if let Some(red) = colors.get("red") {
             let red_value = red.parse::<f32>().unwrap();
             hardcoded.material.diffuse[0] = red_value;
             hardcoded.material.ambient[0] = red_value * 0.1;
         }
 
-        if let Some(green) = colors.get("diffuse_green") {
+        if let Some(green) = colors.get("green") {
             let green_value = green.parse::<f32>().unwrap();
             hardcoded.material.diffuse[1] = green_value;
             hardcoded.material.ambient[1] = green_value * 0.1;
         }
 
-        if let Some(blue) = colors.get("diffuse_blue") {
+        if let Some(blue) = colors.get("blue") {
             let blue_value = blue.parse::<f32>().unwrap();
             hardcoded.material.diffuse[2] = blue_value;
             hardcoded.material.ambient[2] = blue_value * 0.1;
